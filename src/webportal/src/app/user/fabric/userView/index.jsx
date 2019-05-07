@@ -17,8 +17,7 @@
 
 import React, {useState, useEffect, useMemo, useRef} from 'react';
 
-import {initializeIcons} from 'office-ui-fabric-react';
-import {Fabric, Stack} from 'office-ui-fabric-react';
+import {Fabric, Stack, initializeIcons} from 'office-ui-fabric-react';
 import {debounce} from 'lodash';
 
 import {MaskSpinnerLoading} from '../../../components/loading';
@@ -33,6 +32,7 @@ import Ordering from './Ordering';
 import Filter from './Filter';
 import Pagination from './Pagination';
 import Paginator from './Paginator';
+import {getAllUsersRequest} from './requests';
 
 require('bootstrap/js/modal.js');
 const userEditModalComponent = require('./user-edit-modal-component.ejs');
@@ -68,25 +68,14 @@ export default function UserView() {
 
   const [allUsers, setAllUsers] = useState([]);
   const refreshAllUsers = () => {
-    userAuth.checkToken((token) => {
-      $.ajax({
-        url: `${webportalConfig.restServerUri}/api/v1/user`,
-        type: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        dataType: 'json',
-        success: (data) => {
-          setAllUsers(data);
-        },
-        error: (xhr) => {
-          const res = JSON.parse(xhr.responseText);
-          showMessageBox({
-            text: res.message,
-            dismissedCallback: () => {
-              window.location.href = '/';
-            },
-          });
+    getAllUsersRequest((data)=>{
+      setAllUsers(data);
+    }, (xhr)=>{
+      const res = JSON.parse(xhr.responseText);
+      showMessageBox({
+        text: res.message,
+        dismissedCallback: () => {
+          window.location.href = '/';
         },
       });
     });
